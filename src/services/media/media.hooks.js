@@ -1,5 +1,4 @@
 const search = require('feathers-nedb-fuzzy-search')
-
 module.exports = {
   before: {
     all: [],

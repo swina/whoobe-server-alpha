@@ -22,6 +22,7 @@ const users = require('./users/users.service.js');
 const generate = require('./generate/generate.service.js');
 const storeProduct = require('./store/product/product.service.js');
 const workspace = require('./workspace/workspace.service.js');
+const mediaClean = require('./media-clean/media-clean.service.js');
 // eslint-disable-next-line no-unused-vars
 module.exports = function (app) {
   app.configure(elements);
@@ -48,4 +49,5 @@ module.exports = function (app) {
   app.configure(generate);
   app.configure(storeProduct);
   app.configure(workspace);
+  app.configure(mediaClean);
 };

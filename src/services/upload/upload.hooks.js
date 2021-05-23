@@ -1,4 +1,3 @@
-const dauria = require ( 'dauria' )
 const uploadimage = require ( '../../hooks/upload.uploadimage.js')
 module.exports = {
   before: {
