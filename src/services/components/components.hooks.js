@@ -5,9 +5,7 @@ const components = require('../../hooks/components');
 module.exports = {
   before: {
     all: [],
-    find: [function(context){
-      console.log ( context.params)
-    }],
+    find: [],
     get: [],
     create: [components()],
     update: [],

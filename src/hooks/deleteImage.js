@@ -19,7 +19,7 @@ module.exports = (options = {}) => {
         const rootFolder = context.app.get('public')
         const deleteMedia = deleteFile ( rootFolder + context.params.query.image.url.replace('null','/uploads') )
         const mediaFormats = context.params.query.image.formats
-        if ( Object.keys(mediaFormats) ){
+        if ( mediaFormats && Object.keys(mediaFormats) ){
             Object.keys(mediaFormats).map ( format => {
                 console.log ( 'delete file => ' , mediaFormats[format].url )
                 deleteFile ( rootFolder + mediaFormats[format].url.replace('null','/uploads') )

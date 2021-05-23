@@ -2,29 +2,73 @@
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
 
 // eslint-disable-next-line no-unused-vars
-//const projects = require ( '../../whoobe/projects' )
 const fs = require ( 'fs-extra' )
 const path = require ( 'path' )
 const slash = require ( 'slash' )
-const workspace = path.resolve ( '../workspace/' )
+const app = require('../app')
+
+//create workspace with a default project at startup (first run)
+fs.ensureDir ( path.resolve ( '../../whoobe/workspace') ).then ( () => {
+  fs.copy ( path.resolve ( 'whoobe/workspace') + '/default' , path.resolve ( '../../whoobe/workspace') + '/default' )
+}).catch ( error => {
+  console.log ( error )
+}) 
 
 module.exports = (options = {}) => {
   return async context => {
+
+    const workspace = path.resolve('../../whoobe/workspace' )
     
     //projects list
     if ( context.method === 'find' ){
-      var projects = fs.readdirSync ( path.resolve ( workspace ) )
-      projects = projects.filter ( project => {
-        return !fs.statSync(path.resolve( workspace , project )).isFile() 
-      })
-      context.result = projects
+      if ( !context.params.query.project ){
+        var projects = fs.readdirSync ( path.resolve ( workspace ) )
+        projects = projects.filter ( project => {
+          return !fs.statSync(path.resolve( workspace , project )).isFile() 
+        })
+        context.result = projects
+      } else {
+        const project = require ( path.resolve ( workspace , context.params.query.project ) +  '/config/config.js' ) 
+        if ( context.params.query.connect ){
+          if ( context.params.query.project === 'default' ){
+            context.app.set ( 'nedb' , '../data' )
+            console.log ( context.app.get('nedb'))
+            const services = require ( '../services' )
+            context.app.configure ( services )
+            
+          } else {
+            context.app.set ( 'nedb' , path.resolve ( workspace ,  context.params.query.project ) + '/data')
+            console.log ( context.app.get('nedb') )
+            const services = require ( '../services' )
+            context.app.configure ( services )
+          }
+        }
+        context.result = project
+      }
     }
     
     //get single project info
     if ( context.method === 'get' ){
-      console.log ( context.id )
       const project = require ( path.resolve ( workspace , context.id ) +  '/config/config.js' ) 
+      if ( context.id === 'default' ){
+        context.app.set ( 'nedb' , '../data' )
+        console.log ( context.app.get('nedb'))
+        const services = require ( '../services' )
+        context.app.configure ( services )
+      } else {
+        context.app.set ( 'nedb' , path.resolve ( workspace , context.id ) + '/data')
+        console.log ( context.app.get('nedb'))
+        const services = require ( '../services' )
+        context.app.configure ( services )
+      }
       context.result = project 
+    }
+
+    //create project 
+    if ( context.method === 'create' ){
+      fs.copy ( path.resolve ( 'whoobe/workspace') + '/default' , path.resolve ( '../../whoobe/workspace') + '/' + context.data.name ).then ( () => {
+        context.result = 'Created project : ' + context.data.name
+      })
     }
 
     //update project configuration 

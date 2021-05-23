@@ -5,7 +5,7 @@ const sharp = require ( 'sharp' )
 const path = require ( 'path' )
 const axios = require ( 'axios' )
 //var processImage  = require('./processImage');
-
+ 
 module.exports = (options = {}) => {
     return async context => {
         let imgPath = context.app.get('public') + '/uploads/'
@@ -15,12 +15,51 @@ module.exports = (options = {}) => {
             imgPath + context.data.folder + '/' : 
                 imgPath
         let folder = context.data.folder ? '/uploads/' + context.data.folder + '/' : '/uploads/'
-
+        let options = {
+            quality: 80,
+            alphaQuality: 100,
+            nearLossless: false,
+            smartSubsample: true
+        }
         //upload file from URL
+        if ( context.data.dataURL && context.data.name ){
+            var regex = /^data:.+\/(.+);base64,(.*)$/;
+            var matches = context.data.dataURL.match(regex);
+            var ext = matches[1];
+            var data = matches[2];
+            var buffer = Buffer.from(data, 'base64');
+            let imageName = context.data.name + '.webp'
+            sharp(buffer).webp(options).toFile(destination + context.data.name + '.webp').then ( info => {
+                let saveMedia = {
+                    name: imageName,
+                    caption: imageName,
+                    alternativeText: imageName,
+                    provider: 'local',
+                    related: [],
+                    width: info.width,
+                    height: info.height,
+                    size: info.size,
+                    url: folder + imageName,
+                    ext: 'webp', //imageName.substr(imageName.length - 4 ),
+                    mime: 'image/' + info.format,
+                    formats: null
+                }
+                console.log ( context.data )
+                
+                if ( !context.data.folder ){
+                    context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
+                        context.data = result    
+                        return context
+                    })
+                }
+            }).catch ( error => {
+                console.log ( error )
+            })
+        }
         if ( context.data.url && context.data.name ){
-            imageName = context.data.name + '.webp'
+            let imageName = context.data.name + '.webp'
             const input = (await axios({ url: context.data.url , responseType: "arraybuffer" })).data;
-            sharp(input).webp().toFile(destination + context.data.name + '.webp').then ( info => {
+            sharp(input).webp(options).toFile(destination + context.data.name + '.webp').then ( info => {
                 let saveMedia = {
                     name: imageName,
                     caption: imageName,
@@ -59,7 +98,7 @@ module.exports = (options = {}) => {
             //imageName = imageName.split('.')
             //imageName[imageName.length-1] = ''
             //if ( !context.params.format ){
-                sharp(file.buffer).webp().toFile(destination + imageName).then ( info => {
+                sharp(file.buffer).webp(options).toFile(destination + imageName).then ( info => {
                     let saveMedia = {
                             name: imageName,
                             caption: imageName,
