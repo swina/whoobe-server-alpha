@@ -1,10 +1,11 @@
-const uploadimage = require ( '../../hooks/upload.uploadimage.js')
+const { authenticate } = require('@feathersjs/authentication').hooks;
+const deleteImage = require ( '../../hooks/upload-delete/deleteImage')
 module.exports = {
   before: {
-    all: [],
-    find: [],
+    all: [authenticate('jwt')],
+    find: [deleteImage()],
     get: [],
-    create: [ uploadimage() ],
+    create: [],
     update: [],
     patch: [],
     remove: []

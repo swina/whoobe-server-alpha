@@ -1,10 +1,11 @@
 
+const { authenticate } = require('@feathersjs/authentication').hooks;
 
 const singleCollectionCreate = require('../../hooks/single.collection.create');
 
 module.exports = {
   before: {
-    all: [],
+    all: [authenticate('jwt')],
     find: [],
     get: [],
     create: [],

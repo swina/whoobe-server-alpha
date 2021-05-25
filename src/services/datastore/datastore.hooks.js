@@ -1,8 +1,8 @@
-const datastoreDB = require ( '../../hooks/datastoreDB')
-
+const datastoreDB = require ( '../../hooks/datastore/datastoreDB')
+const { authenticate } = require('@feathersjs/authentication').hooks;
 module.exports = {
   before: {
-    all: [datastoreDB()],
+    all: [authenticate('jwt'),datastoreDB()],
     find: [],
     get: [],
     create: [],

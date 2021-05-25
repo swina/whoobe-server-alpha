@@ -1,9 +1,9 @@
-
-const mediaClean = require ( '../../hooks/media.clean.js')
+const { authenticate } = require('@feathersjs/authentication').hooks;
+const mediaClean = require ( '../../hooks/media/media.clean.js')
 
 module.exports = {
   before: {
-    all: [],
+    all: [authenticate('jwt')],
     find: [mediaClean()],
     get: [],
     create: [],

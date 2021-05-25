@@ -3,9 +3,11 @@
   "port": 3030,
   "public": "../public/",
   "uploads": "../public/uploads/",
+  "workspace" : "../../workspace/",
+  "generator" : "../../whoobe-nuxt/",
   "paginate": {
     "default": 20,
-    "max": 200
+    "max": 300
   },
   "nedb": "../data",
   "extendKey": "0299ka@@as000122212",

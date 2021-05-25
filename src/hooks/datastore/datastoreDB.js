@@ -8,7 +8,7 @@
  * if a collection has not been create with /collections endpoint throw an error (service not available)
  * */
 const Datastore = require('nedb');
-const hooks = require ( '../services/datastore/datastore.class')
+const hooks = require ( '../../services/datastore/datastore.class')
 const path = require('path');
 const fs = require('fs')
 

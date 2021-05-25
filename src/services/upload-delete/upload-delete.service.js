@@ -1,6 +1,6 @@
 // Initializes the `uploads-delete` service on path `/uploads/delete`
-const { UploadsDelete } = require('./uploads-delete.class');
-const hooks = require('./uploads-delete.hooks');
+const { UploadsDelete } = require('./upload-delete.class');
+const hooks = require('./upload-delete.hooks');
 
 module.exports = function (app) {
   const options = {

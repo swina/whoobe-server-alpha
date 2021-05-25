@@ -1,10 +1,10 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 
-const workspace = require('../../hooks/workspace');
+const workspace = require('../../hooks/workspace/workspace');
 
 module.exports = {
   before: {
-    all: [workspace()],
+    all: [authenticate('jwt'),workspace()],
     find: [],
     get: [],
     create: [],

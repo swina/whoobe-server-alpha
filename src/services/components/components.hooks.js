@@ -1,16 +1,16 @@
 
-
-const components = require('../../hooks/components');
+const { authenticate } = require('@feathersjs/authentication').hooks;
+const components = require('../../hooks/components/components');
 
 module.exports = {
   before: {
     all: [],
     find: [],
     get: [],
-    create: [components()],
-    update: [],
-    patch: [components()],
-    remove: []
+    create: [authenticate('jwt'),components()],
+    update: [authenticate('jwt')],
+    patch: [authenticate('jwt'),components()],
+    remove: [authenticate('jwt')]
   },
 
   after: {
