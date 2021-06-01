@@ -8,6 +8,7 @@ const slash = require ( 'slash' )
 //const app = require('../app')
 //create workspace with a default project at startup (first run)
 function firstRun ( ws ){
+  if ( path.resolve ( ws ) ) return 
   //const ws = path.resolve ( app.get ( 'workspace' ))
   const source = path.resolve ( 'whoobe/workspace' )
   fs.ensureDir ( ws ).then ( () => {

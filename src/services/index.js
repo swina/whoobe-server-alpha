@@ -18,6 +18,7 @@ const uploadFile = require('./upload-file/upload-file.service.js');
 const users = require('./users/users.service.js');
 const whoobeBuild = require('./whoobe-build/whoobe-build.service.js');
 const workspace = require('./workspace/workspace.service.js');
+const blockElements = require('./block-elements/block-elements.service.js');
 //const uploadfile = require('./upload/upload.service.js');
 //const collections = require('./collections/collections.service.js');
 //const collectionCreate = require('./collection-create/collection-create.service.js');
@@ -50,4 +51,5 @@ module.exports = function (app) {
   //app.configure(collectionCreate);
   //app.configure(collection);
   //app.configure(apikeys);
+  app.configure(blockElements);
 };
