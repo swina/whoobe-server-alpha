@@ -13,7 +13,7 @@ module.exports = (options = {}) => {
     if ( context.data.project ){
       const workspace = slash(path.resolve ( context.app.get('workspace') ) )
       const generator = slash(path.resolve ( context.app.get('generator') ) )//'../workspace/' ))
-      fs.copyFileSync ( slash(path.resolve ( workspace , context.data.project ) + '/config/config.js') ,  slash(workspace + '/config.js' ) )
+      //fs.copyFileSync ( slash(path.resolve ( workspace , context.data.project ) + '/config/config.js') ,  slash(workspace + '/config.js' ) )
     
       process.chdir( path.resolve ( generator ) )// "../" , "whoobe-nuxt/" ) )
       const myShellScript = exec("yarn generate");
@@ -31,19 +31,23 @@ module.exports = (options = {}) => {
         context.app.service('generate').create({ data: 'Whoobe Site Generation done!\n' } )
         context.app.service('generate').create ( { data: 'done\n'} )
 
-        fs.removeSync( path.resolve ( workspace , context.data.project ) + '/dist/uploads'  )
+        //fs.removeSync( path.resolve ( workspace , context.data.project ) + '/dist/uploads'  )
+        fs.removeSync( path.resolve ( generator ) + '/uploads'  )
         if ( context.data.uploads ){
           context.app.service('generate').create ( { data: 'Uploading ' + context.data.uploads.length + ' assets ...\n'} )
           let errors = 0
           context.data.uploads.forEach ( (image,i) => {
-            fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( workspace , context.data.project ) + '/dist' + image ).then ( () => {
-              context.app.service('generate').create ( { data: image + ' uploaded.\n'} )
+            // fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( workspace , context.data.project ) + '/dist' + image ).then ( () => {
+            //   context.app.service('generate').create ( { data: image + ' uploaded.\n'} )
+            // })
+            fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( generator  ) + '/dist' + image ).then ( () => {
+              context.app.service('generate').create ( { data: path.resolve ( generator ) + '/dist' + image + ' uploaded.\n'} )
             })
             .catch(err => {
               context.app.service('generate').create ( { error: 'Upload error ' + image + '\n' } )
               console.error(err)
               errors++
-            })
+            })  
           })
         }
         

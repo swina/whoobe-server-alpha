@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["nuxpresso_58"],{"8f66":function(a,t,c){"use strict";c.r(t);var i={buy:"Acquista",add_to_cart:"Aggiungi al carrello",checkout:"Vai alla cassa",detail:"Dettaglio"};t["default"]=i}}]);
