@@ -12,11 +12,23 @@ module.exports = (options = {}) => {
     
     if ( context.data.project ){
       const workspace = slash(path.resolve ( context.app.get('workspace') ) )
+      //const generator = slash(path.resolve(context.app.get('vite') ) )
+      
       const generator = slash(path.resolve ( context.app.get('generator') ) )//'../workspace/' ))
       //fs.copyFileSync ( slash(path.resolve ( workspace , context.data.project ) + '/config/config.js') ,  slash(workspace + '/config.js' ) )
-    
-      process.chdir( path.resolve ( generator ) )// "../" , "whoobe-nuxt/" ) )
-      const myShellScript = exec("yarn generate");
+      const vite = slash(path.resolve(context.app.get('vite')))
+      //if ( context.data.project.mode != 'single' ){
+      //  process.chdir( path.resolve ( generator ) )// "../" , "whoobe-nuxt/" ) )
+      //  const cmd = 'yarn generate'
+      //  const myShellScript = exec(cmd);
+      //  const project = generator
+      //} else {
+        process.chdir( path.resolve ( vite ) )
+        const cmd = 'yarn build'
+        const project = vite
+        const myShellScript = exec("yarn build");
+      //}
+      
       myShellScript.stdout.on('data', (data)=>{
 
         context.app.service('generate').create({ data: data})
@@ -40,8 +52,8 @@ module.exports = (options = {}) => {
             // fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( workspace , context.data.project ) + '/dist' + image ).then ( () => {
             //   context.app.service('generate').create ( { data: image + ' uploaded.\n'} )
             // })
-            fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( generator  ) + '/dist' + image ).then ( () => {
-              context.app.service('generate').create ( { data: path.resolve ( generator ) + '/dist' + image + ' uploaded.\n'} )
+            fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( project  ) + '/dist' + image ).then ( () => {
+              context.app.service('generate').create ( { data: path.resolve ( project ) + '/dist' + image + ' uploaded.\n'} )
             })
             .catch(err => {
               context.app.service('generate').create ( { error: 'Upload error ' + image + '\n' } )
@@ -49,8 +61,32 @@ module.exports = (options = {}) => {
               errors++
             })  
           })
-        }
-        
+          doCommit()
+      }
+      function doCommit(){
+        console.log ( 'committing project' )
+        const commitMe = exec('git add .')
+        commitMe.stdout.on('data', (data)=>{
+          context.app.service('generate').create({ data: data})
+        });
+        commitMe.on('exit' , (data) => {
+          console.log ( data )
+          const commitChanges = exec ( 'git commit -m "Another release"' )
+          commitChanges.stdout.on('data',(data)=>{
+            context.app.service('generate').create ( { data: data })
+          })
+          commitChanges.on ( 'exit' , (data) => {
+            console.log ( data )
+            const commitPush = exec ( 'git push' )
+            commitPush.stdout.on ( 'data' , (data) => {
+              context.app.service ( 'generate' ).create ( { data: data })
+            })
+            commitPush.on ( 'exit' , (data) => {
+              context.app.service ('generate').create ({ data:  'Project committed' } )
+            })
+          })
+        })
+      }  
         
         // fs.copy( path.resolve( context.app.get('uploads') ) , path.resolve ( workspace , context.data.project ) + '/dist/uploads' )
         //     .then(() => {

@@ -1,6 +1,6 @@
 
 const { authenticate } = require('@feathersjs/authentication').hooks;
-const whoobegenerate = require('../../hooks/generate/generate');
+const whoobegenerate = require('../../hooks/generate/generate.js');
 module.exports = {
   before: {
     all: [authenticate('jwt')],

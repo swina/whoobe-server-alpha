@@ -5,6 +5,7 @@
   "uploads": "../public/uploads/",
   "workspace" : "../../workspace/",
   "generator" : "../../whoobe-generator-alpha/",
+  "vite" : "../../whoobe-generator-vite/",
   "paginate": {
     "default": 20,
     "max": 300
