@@ -1,11 +1,9 @@
-const { authenticate } = require('@feathersjs/authentication').hooks;
 
-//const workspace = require('../../hooks/workspace/workspace');
-//remove service ????
+const proxy = require ( '../../hooks/proxy/proxy.js' )
 module.exports = {
   before: {
-    all: [authenticate('jwt')],
-    find: [],
+    all: [],
+    find: [proxy()],
     get: [],
     create: [],
     update: [],

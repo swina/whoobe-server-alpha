@@ -4,7 +4,7 @@ const whoobegenerate = require('../../hooks/generate/generate.js');
 module.exports = {
   before: {
     all: [authenticate('jwt')],
-    find: [],
+    find: [whoobegenerate()],
     get: [],
     create: [whoobegenerate()],
     update: [],
