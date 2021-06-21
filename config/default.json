@@ -5,7 +5,9 @@
   "uploads": "../public/uploads/",
   "workspace" : "../../workspace/",
   "generator" : "../../whoobe-generator-alpha/",
-  "vite" : "../../whoobe-generator-vite/",
+  "vite" : "../../whoobe-generator-cloud/",
+  "vite_deploy_hook" : "api.vercel.com",
+  "vide_deploy_path" : "/v1/integrations/deploy/prj_UrXSK65cstEKML6ExXwtbbYVmQ9N/9qhcTh7amC",
   "paginate": {
     "default": 20,
     "max": 300
