@@ -19,47 +19,17 @@ function cssArray(arr){
         purgedCSS.push ( css ) : null
     })
   })
-  console.log ( purgedCSS )
   return 
 }
 
 module.exports = (options = {}) => {
   return async context => {
     if ( context.data.project ){
-      let json = context.data.project.component.json
-      //console.log ( context.data.project )
+      let json = context.data.project.json
       let classes = await jp.query ( json , '$..blocks..css')
-      //let extraClasses = await jp.query ( json , '$..blocks[?(@.css.length>0)]..css')
       await cssArray ( classes )
-      //await cssArray ( extraClasses )
-      console.log ( [...new Set(purgedCSS)] )
       context.result = [...new Set(purgedCSS)]
       return context
-      // let purgeClasses = []
-      // classes.forEach ( classe => {
-      //     let generalCSS 
-      //     if ( typeof classe === 'string' ){
-      //       generalCSS = classe.split(' ')
-      //     } else {
-      //       generalCSS = Object.values ( classe ).join (' ').split(' ')
-      //       console.log ( generalCSS )
-      //     }
-
-      //     generalCSS.forEach ( css => {
-      //       css.length ? 
-      //         purgeClasses.push ( css ) : null
-      //     })
-         
-      //     if ( json.css ){
-      //       let pageCSS = json.css.split(' ')
-      //       pageCSS.forEach ( css => {
-      //         if ( css )
-      //           purgeClasses.push ( css )
-      //       })
-      //     }
-      //     context.result = [...new Set(purgeClasses) ]
-      //     return context
-      // })
       
     }
   };

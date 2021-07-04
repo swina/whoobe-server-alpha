@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["nuxpresso_78"],{"4f75":function(n,e,i){"use strict";i.r(e);i("b0c0"),i("a4d3"),i("e01a");e["default"]={install:function(n){n.prototype.$add_to_cart=function(n){if(n)return!1;n._id,n.sale?n.sale:n.price,n._id,n.image,n.name,n.description?n.description:n.name}}}}}]);

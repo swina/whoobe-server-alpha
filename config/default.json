@@ -5,12 +5,25 @@
   "uploads": "../public/uploads/",
   "workspace" : "../../workspace/",
   "generator" : "../../whoobe-generator-alpha/",
-  "vite" : "../../whoobe-generator-cloud/",
+  "nuxt" : "../../whoobe-nuxt",
+  "vite" : "../../whoobe-generator/",
   "vite_deploy_hook" : "api.vercel.com",
   "vide_deploy_path" : "/v1/integrations/deploy/prj_UrXSK65cstEKML6ExXwtbbYVmQ9N/9qhcTh7amC",
+  "articles_limit" : 50,
   "paginate": {
     "default": 20,
     "max": 300
+  },
+  "images" : {
+    "options" : {
+      "quality": 80,
+      "alphaQuality": 100,
+      "nearLossless": false,
+      "smartSubsample": true
+    },
+    "format" : "webp",
+    "multiple" : true,
+    "sizes" : [1024,640,320,150]
   },
   "nedb": "../data",
   "extendKey": "0299ka@@as000122212",

@@ -23,6 +23,7 @@ const proxy = require('./proxy/proxy.service.js');
 const resources = require('./resources/resources.service.js');
 //const uploadfile = require('./upload/upload.service.js');
 const collections = require('./collections/collections.service.js');
+const buildNuxt = require('./build-nuxt/build-nuxt.service.js');
 //const collectionCreate = require('./collection-create/collection-create.service.js');
 //const collection = require('./collection/collection.service.js');
 //const apikeys = require('./apikeys/apikeys.service.js');
@@ -56,4 +57,5 @@ module.exports = function (app) {
   app.configure(blockElements);
   app.configure(proxy);
   app.configure(resources);
+  app.configure(buildNuxt);
 };
