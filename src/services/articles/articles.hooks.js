@@ -1,10 +1,10 @@
 
 const { authenticate } = require('@feathersjs/authentication').hooks;
-
+const search = require('feathers-nedb-fuzzy-search')
 module.exports = {
   before: {
     all: [],
-    find: [],
+    find: [search(['title','excerpt','content'])],
     get: [],
     create: [authenticate('jwt')],
     update: [authenticate('jwt')],

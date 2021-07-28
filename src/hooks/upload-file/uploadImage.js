@@ -1,8 +1,9 @@
 const { contentSecurityPolicy } = require('helmet');
-const fs = require ( 'fs' )
+const fs = require ( 'fs-extra' )
 const sharp = require ( 'sharp' )
 const path = require ( 'path' )
 const axios = require ( 'axios' )
+var cloudinary = require('cloudinary').v2;
 
 module.exports = (options = {}) => {
     return async context => {
@@ -15,7 +16,9 @@ module.exports = (options = {}) => {
             imgPath + context.data.folder + '/' : 
                 imgPath
         let folder = context.data.folder ? '/uploads/' + context.data.folder + '/' : '/uploads/'
-        console.log ( context.data )
+        
+        await fs.ensureDir(path.resolve(destination))
+        
         //upload file from URL
         if ( context.data.dataURL && context.data.name ){
             var regex = /^data:.+\/(.+);base64,(.*)$/;
@@ -37,16 +40,17 @@ module.exports = (options = {}) => {
                     url: folder + imageName,
                     ext: 'webp', //imageName.substr(imageName.length - 4 ),
                     mime: 'image/' + info.format,
-                    formats: null
+                    formats: null,
+                    folder: context.data.folder ? context.data.folder : ''
                 }
-                console.log ( context.data )
+                //console.log ( context.data )
                 
-                if ( !context.data.folder ){
+                //if ( !context.data.folder ){
                     context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
                         context.data = result    
                         return context
                     })
-                }
+                //}
             }).catch ( error => {
                 console.log ( error )
             })
@@ -73,6 +77,7 @@ module.exports = (options = {}) => {
                     height: info.height,
                     size: info.size,
                     url: folder + imageName,
+                    folder: context.data.folder ? context.data.folder : '',
                     ext: 'webp', //imageName.substr(imageName.length - 4 ),
                     mime: 'image/' + info.format,
                     formats: {
@@ -100,21 +105,21 @@ module.exports = (options = {}) => {
                             .all(options.sizes.map(resize))
                             .then(() => {
                                 console.log('complete');
-                                if ( !context.data.folder ){
+                                //if ( !context.data.folder ){
                                     context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
                                         context.data = result    
-                                        return context
+                                        resolve( context )
                                     })
-                                }  
+                                //}  
                                 
                             })
                 } else {
-                    if ( !context.data.folder ){
+                    //if ( !context.data.folder ){
                         context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
                             context.data = result    
                             return context
                         })
-                    }
+                    //}
                 }
             }).catch ( error => {
                 console.log ( error )
@@ -126,71 +131,119 @@ module.exports = (options = {}) => {
             let imageName = file.originalname
             imageName = imageName.replace(/ /g,'_')
             imageName = imageName.split('.').slice(0, -1).join('.') + '.webp' 
-        
-            sharp(file.buffer).webp(options).toFile(destination + imageName).then ( info => {
-                console.log ( info )
-                let format = {
-                    ext: 'webp',
-                    mime: 'image/' + options.format,
-                    width: info.width,
-                    height: info.height,
-                    size: info.size,
-                    url: folder + imageName
-                }
+            if ( file.mimetype.includes('image') && !file.mimetype.includes('svg') &&  !context.data.cloudinary ){
+
+                sharp(file.buffer).webp(options).toFile(destination + imageName).then ( info => {
+                    console.log ( info )
+                    let format = {
+                        ext: 'webp',
+                        mime: 'image/' + options.format,
+                        width: info.width,
+                        height: info.height,
+                        size: info.size,
+                        url: folder + imageName
+                    }
+                    let saveMedia = {
+                        name: imageName,
+                        caption: imageName,
+                        alternativeText: imageName,
+                        provider: 'local',
+                        related: [],
+                        width: info.width,
+                        height: info.height,
+                        size: info.size,
+                        url: folder + imageName,
+                        folder: context.params.folder ? context.params.folder : '',
+                        ext: 'webp', //imageName.substr(imageName.length - 4 ),
+                        mime: 'image/' + info.format,
+                        formats: {
+                            full : format
+                        }
+                    }
+                    if ( options.multiple ){
+                        const resize = size => sharp(file.buffer)
+                            .resize( {width: size})
+                            .toFile(destination + size + '_' + imageName).then( img =>{
+                                console.log ( img , saveMedia )
+                                saveMedia.formats[size] = {
+                                    ext: 'webp',
+                                    mime: saveMedia.mime,
+                                    width: size,
+                                    height: img.height,
+                                    size: img.size,
+                                    url: folder + size + '_' + imageName
+                                }
+                            }).catch ( error => {
+                                console.log ( error )
+                            });
+
+                            Promise
+                                .all(options.sizes.map(resize))
+                                .then(() => {
+                                    console.log('complete');
+                                    ///if ( !context.data.folder ){
+                                        context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
+                                            context.data = result    
+                                            return context
+                                        })
+                                    //}  
+                                    
+                        });
+                    } else {
+                        //if ( !context.data.folder ){
+                            context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
+                                context.data = result    
+                                return context
+                            })
+                        //}
+                    }
+                })
+            } else {
+                console.log ( 'File=>',file)
                 let saveMedia = {
-                    name: imageName,
-                    caption: imageName,
-                    alternativeText: imageName,
+                    name: file.originalname,
+                    caption: null,
+                    alternativeText: null,
                     provider: 'local',
                     related: [],
-                    width: info.width,
-                    height: info.height,
-                    size: info.size,
-                    url: folder + imageName,
-                    ext: 'webp', //imageName.substr(imageName.length - 4 ),
-                    mime: 'image/' + info.format,
-                    formats: {
-                        full : format
-                    }
+                    width: null,
+                    height: null,
+                    size: file.size,
+                    url: folder + file.originalname,
+                    folder: context.data.folder ? context.data.folder : '',
+                    ext: file.originalname.split('.')[file.originalname.split('.').length -1], //imageName.substr(imageName.length - 4 ),
+                    mime: file.mimetype,
+                    formats: null
                 }
-                if ( options.multiple ){
-                    const resize = size => sharp(file.buffer)
-                        .resize( {width: size})
-                        .toFile(destination + size + '_' + imageName).then( img =>{
-                            console.log ( img , saveMedia )
-                            saveMedia.formats[size] = {
-                                ext: 'webp',
-                                mime: saveMedia.mime,
-                                width: size,
-                                height: img.height,
-                                size: img.size,
-                                url: folder + size + '_' + imageName
-                            }
-                        }).catch ( error => {
-                            console.log ( error )
-                        });
-
-                        Promise
-                            .all(options.sizes.map(resize))
-                            .then(() => {
-                                console.log('complete');
-                                if ( !context.data.folder ){
-                                    context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
-                                        context.data = result    
-                                        return context
-                                    })
-                                }  
-                                
-                    });
-                } else {
-                    if ( !context.data.folder ){
+                
+                
+                await fs.writeFileSync ( path.resolve(context.app.get('public')) + '/uploads/' + file.originalname , file.buffer )
+                if ( context.data.cloudinary === 'true' ){
+                    
+                    console.log ( 'Uploading to cloudinary ' , path.resolve(context.app.get('public')) + '/uploads/' + file.originalname )
+                    await cloudinary.config ( context.app.get ('cloudinary') )
+                    cloudinary.uploader.upload ( path.resolve(context.app.get('public')) + '/uploads/' + file.originalname , ( err,result ) => {
+                        console.log ( err )
+                        console.log ( result )
+                        if ( err ) return context.error
+                        saveMedia.url = result.url
+                        saveMedia.width = result.width
+                        saveMedia.height = result.height
+                        saveMedia.provider = 'cloudinary'
                         context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
+                            fs.unlinkSync ( path.resolve(context.app.get('public')) + '/uploads/' + file.originalname )
                             context.data = result    
                             return context
                         })
-                    }
+                    })
+                } else {
+                    context.app.service ( 'media' ).create ( saveMedia ).then ( result => {
+                        context.data = result    
+                        return context
+                    })
                 }
-            })
+
+            }
         }
 
     };

@@ -24,19 +24,24 @@ module.exports = (options = {}) => {
     }
 
     if ( context.data ){
+      //context.app.service ( 'generate' ).create ( { data: 'Pages to publish : \n' + context.data.pagesToPublish.filter(slug => !slug.includes('store/category') && slug != 'store' ).join('\n') } )
       console.log ( 'Collecting articles media, fonts and purge settings')
-      context.app.service ( 'generate' ).create ( { data: 'Local building mode : Website\n' } )
+      context.app.service ( 'generate' ).create ( 
+        { data: 'Pages to publish : \n' + context.data.resources.links.join('\n') } 
+      )
+      context.app.service ( 'generate' ).create ( { data: '\nLocal building mode : Website\n' } )
+      
       //get articles to publish, limit is set in ./config/default.json => articles_limit
+      
+      //let slugs = context.data.pagesToPublish.filter(slug => !slug.includes('store/category') && slug != 'store' )
+      let slugs = context.data.resources.links
       const articles = await context.app.service('articles').find({
-        query: {
-           $limit: 50,
-           publish: true,
-           $select: [ 'title' , 'slug' , 'excerpt' , 'content' , 'image' , 'seo_title' , 'seo_description' , 'uploads' , 'blocks' , 'homepage' ]
-        }
+         query: {
+            slug : { $in : slugs },
+            $select: [ 'title' , 'slug' , 'excerpt' , 'content' , 'image' , 'seo_title' , 'seo_description' , 'uploads' , 'blocks' , 'homepage' ]
+         }
       })
-      console.log ( 'articles=> ' , articles.total )
-      //message total articles found 
-      context.app.service ( 'generate' ).create ( { data: articles.total + ' articles found\n'})
+      context.app.service ( 'generate' ).create ( { data: articles.data.length + ' articles found\n'})
 
      
       //get default template for the articles
@@ -47,7 +52,6 @@ module.exports = (options = {}) => {
         }
       })
 
-      console.log ( template )
 
       
       //collect all images, fonts and purgeCSS for all articles
@@ -55,8 +59,9 @@ module.exports = (options = {}) => {
       let pagesImages = []
       let pagesFonts = []
       let pagesPurge = []
+      let store = false
       articles.data.forEach ( article => {
-        // let pageDir = fs.ensureDir ( path.resolve(context.app.get('vite')) + '/public/' + article.slug )
+        context.app.service ( 'generate' ).create ( { data: 'Collecting data for : ' + article.title + '\n' } )
         if ( article.image ){
           if ( !article.image.url.includes('//') ){
             pagesImages.push(article.image.url)
@@ -68,34 +73,71 @@ module.exports = (options = {}) => {
           })
         }
         if ( article.blocks ){
+          context.app.service ( 'generate' ).create ( { data: article.slug + '\n' } )
           if ( article.blocks.uploads ){
-            pagesImages = [...pagesImages,...article.blocks.uploads]
+            article.blocks.uploads.forEach ( upload => {
+              context.app.service ('generate').create ( { data: article.title + '  => image => ' + upload + '\n' })
+              pagesImages.push ( upload )
+            })
           }
-          if ( article.blocks.purge ){
-            pagesPurge = [...pagesPurge , ...article.blocks.purge ]
+          if ( article.blocks.purge.length ){
+            article.blocks.purge.forEach ( purge => {
+              pagesPurge.push ( purge )
+            })
           }
           if ( article.blocks.fonts ){
-            pagesFonts = [...pagesFonts , ...article.blocks.fonts ]
+            article.blocks.fonts.forEach ( font => {
+              pagesFonts.push ( font )
+            })
+          }
+          if ( article.blocks.store ){
+            store = true
+            context.data.blocks.store = true
           }
         }
+
       })
-    
-      //create destination folder if doesn't exists
+      //check if store has to be generated
+      if ( context.data.blocks.store ){
+        //collect build info for store (images, CSS purge and fonts used)
+        const article = await  context.app.service('articles').find ( { query: { store: true } } )
+        console.log ( article )
+        pagesImages = [ ...pagesImages , ...article.data[0].blocks.uploads ]
+        pagesPurge = [ ...pagesPurge , ...article.data[0].blocks.purge ]
+        pagesFonts = [ ...pagesFonts , ...article.data[0].blocks.fonts ]
+      }
+
+      //create project destination folder is a different destination folder has been defined if doesn't exists
       if ( context.data.target ) await fs.ensureDir ( path.resolve(context.data.target) )
       
+      
+      //merge default template build info
       if ( template.uploads ) pagesImages = [...pagesImages , ...template.uploads ]
       if ( template.fonts ) pagesFonts = [...pagesFonts , ...template.fonts ]
       if ( template.purge ) pagesPurge = [...pagesPurge , ...template.purge ]
+      
+      
+      //merge & eliminate duplicates from build info arrays
+      context.data.resources.uploads = [...new Set ( [ ...context.data.resources.uploads , ...pagesImages ])]
+      context.data.resources.fonts = [...new Set ( [ ...context.data.resources.fonts , ...pagesFonts ] ) ]
+      context.data.resources.purge = [...new Set ( [ ...context.data.resources.purge , ...pagesPurge ] ) ]  
+      
+      context.app.service ( 'generate' ).create ( { data: context.data.resources.pages.length + ' articles images found\n'})
+      
+      // copy images to upload to nuxt static folder
+      let uploads = context.data.resources.uploads
 
-      context.data.blocks.uploads = [...new Set ( [ ...context.data.blocks.uploads , ...pagesImages ])]
-      context.data.blocks.fonts = [...new Set ( [ ...context.data.blocks.fonts , ...pagesFonts ] ) ]
-      context.data.blocks.purge = [...new Set ( [ ...context.data.blocks.purge , ...pagesPurge ] ) ]  
-
-    //console.log ( articlesUploads , articlesFonts , articlesPurge )
-      context.app.service ( 'generate' ).create ( { data: pagesImages.length + ' articles images found\n'})
-      // context.app.service ( 'generate' ).create ( { data: articlesFonts.length + ' articles fonts found\n'})
-
-      await context.data.blocks.uploads.forEach ( (image,i) => {
+      //check if website has store, if not remove all products images from copy to the static folder
+      if ( !context.data.resources.store ){
+        uploads = context.data.resources.uploads.filter ( image => !image.includes('/products/') )
+      }
+      
+      //empty nuxtjs ./static/uploads folder
+      await fs.emptyDir ( path.resolve ( nuxt ) + '/static/uploads' )
+      
+      //populate nuxtjs ./static/uploads folder with the build images used
+      await uploads.forEach ( (image,i) => {
+        
         fs.copy ( path.resolve( context.app.get('public') ) + image , path.resolve ( nuxt ) + '/static' + image )
           .then ( () => {
             context.app.service('generate').create ( { data: '/static' + image + ' uploaded.\n'} )
@@ -107,12 +149,13 @@ module.exports = (options = {}) => {
         }) 
       })
 
+      //run nuxtjs generate command
       process.chdir( path.resolve ( nuxt ) )
         const cmd = 'yarn generate'
         const myShellScript = exec("yarn generate",{detached:true});
         myShellScript.stdout.on('data', (data)=>{
           //send info to client
-          context.app.service('generate').create({ data: context.data.title + ' => '  + data})
+          context.app.service('generate').create({ data: new Date().toLocaleString() + ' => '  + data})
         });
         myShellScript.stderr.on('data', (data)=>{
           //send errors info to client
@@ -126,15 +169,9 @@ module.exports = (options = {}) => {
           context.app.service('generate').create ( { data: 'done\n'} )
           previewExec = exec ( 'yarn start' , {detached:true} )
         })  
-    // project.uploads = [...new Set ( [...project.uploads , ...articlesUploads ]) ]
-    // project.fonts = [...new Set ( [...project.fonts , ...articlesFonts ]) ]
-    // project.purge = [...new Set ( [...project.purge , ...articlesPurge ]) ]
     
-    // context.app.service ( 'projects' ).create ( project ).then ( res => {
-    //   console.log ( res )
-    // })
 
-    return context;
+      return context;
     }
   };
 };

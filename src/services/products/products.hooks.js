@@ -4,7 +4,7 @@ const search = require('feathers-nedb-fuzzy-search')
 module.exports = {
   before: {
     all: [],
-    find: [search(['name','category','description','sku'])],
+    find: [search(['name','category','description','sku','price'])],
     get: [],
     create: [authenticate('jwt')],
     update: [authenticate('jwt')],

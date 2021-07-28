@@ -3,12 +3,7 @@
   "port": 3030,
   "public": "../public/",
   "uploads": "../public/uploads/",
-  "workspace" : "../../workspace/",
-  "generator" : "../../whoobe-generator-alpha/",
   "nuxt" : "../../whoobe-nuxt",
-  "vite" : "../../whoobe-generator/",
-  "vite_deploy_hook" : "api.vercel.com",
-  "vide_deploy_path" : "/v1/integrations/deploy/prj_UrXSK65cstEKML6ExXwtbbYVmQ9N/9qhcTh7amC",
   "articles_limit" : 50,
   "paginate": {
     "default": 20,
@@ -25,8 +20,14 @@
     "multiple" : true,
     "sizes" : [1024,640,320,150]
   },
+  "cloudinary" : { 
+    "cloud_name": "<cloud_name>", 
+    "api_key":    "<api_key>", 
+    "api_secret": "<api_secret>",
+    "secure": true
+  },
   "nedb": "../data",
-  "extendKey": "0299ka@@as000122212",
+  "extendKey": "_______NOT_USED______",
   "authentication": {
     "entity": "user",
     "service": "users",

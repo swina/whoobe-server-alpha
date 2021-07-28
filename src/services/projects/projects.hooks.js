@@ -7,9 +7,9 @@ module.exports = {
     all: [],
     find: [],
     get: [],
-    create: [authenticate('jwt'),saveConfig()],
-    update: [authenticate('jwt'),saveConfig()],
-    patch: [authenticate('jwt'),saveConfig()],
+    create: [authenticate('jwt')],
+    update: [authenticate('jwt')],
+    patch: [authenticate('jwt')],
     remove: [authenticate('jwt')]
   },
 

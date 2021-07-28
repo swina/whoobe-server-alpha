@@ -25,11 +25,11 @@
   "scripts": {
     "test": "yarn run eslint && yarn run jest",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
-    "dev": "nodemon src/",
+    "dev": "nodemon -i ./public src/",
     "start": "node src/",
     "jest": "jest  --forceExit"
   },
-  "dependencies": { 
+  "dependencies": {
     "@feathersjs/authentication": "^4.4.1",
     "@feathersjs/authentication-local": "^4.4.1",
     "@feathersjs/authentication-oauth": "^4.4.1",
@@ -39,8 +39,10 @@
     "@feathersjs/feathers": "^4.4.1",
     "@feathersjs/socketio": "^4.4.1",
     "@feathersjs/transport-commons": "^4.5.11",
+    "@woocommerce/woocommerce-rest-api": "^1.0.1",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
+    "cloudinary": "^1.26.2",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "dauria": "^2.0.0",
@@ -63,6 +65,7 @@
     "serve-favicon": "^2.5.0",
     "sharp": "^0.28.1",
     "slash": "^3.0.0",
+    "streamifier": "^0.1.1",
     "unirest": "^0.6.0",
     "winston": "^3.0.0"
   },

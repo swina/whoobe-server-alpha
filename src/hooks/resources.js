@@ -28,6 +28,10 @@ module.exports = (options = {}) => {
       let json = context.data.project.json
       let classes = await jp.query ( json , '$..blocks..css')
       await cssArray ( classes )
+      let plugins_css = await jp.query ( json , '$..plugin..settings..css')
+      await cssArray ( plugins_css )
+      let plugins_container = await jp.query ( json , '$..plugin..settings..container')
+      await cssArray ( plugins_container )
       context.result = [...new Set(purgedCSS)]
       return context
       

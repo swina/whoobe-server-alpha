@@ -4,12 +4,12 @@ const buildNuxt = require('../../hooks/build/build-nuxt');
 
 module.exports = {
   before: {
-    all: [ buildNuxt()],
+    all: [ ],
     find: [],
     get: [authenticate('jwt')],
-    create: [authenticate('jwt')],
-    update: [authenticate('jwt')],
-    patch: [authenticate('jwt')],
+    create: [buildNuxt(),authenticate('jwt')],
+    update: [buildNuxt(),authenticate('jwt')],
+    patch: [buildNuxt(),authenticate('jwt')],
     remove: [authenticate('jwt')]
   },
 
