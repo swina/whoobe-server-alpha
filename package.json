@@ -51,7 +51,7 @@
     "feathers-memory": "^4.1.0",
     "feathers-nedb": "^5.1.0",
     "feathers-nedb-fuzzy-search": "^1.4.0",
-    "file-type": "^16.3.0",
+    "file-type": "^16.5.4",
     "fs-blob-store": "^6.0.0",
     "fs-extra": "^9.1.0",
     "helmet": "^3.21.2",
